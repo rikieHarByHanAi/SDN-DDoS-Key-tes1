@@ -14,3 +14,4 @@ Kode untuk artikel JICTRA: "Hybrid LSTM-Attention Model for DDoS Attack Detectio
 
 ## Catatan
 Eksperimen dilakukan di Google Colab gratis (12 GB RAM).
+File dataset dapat di ambil di https://drive.google.com/file/d/1zA56304LZZ5RbNpiNtZhJylQT1ikrhiF/view?usp=drive_link
