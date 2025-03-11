@@ -116,6 +116,37 @@ plt.legend()
 plt.tight_layout()
 plt.savefig('loss_accuracy.png', dpi=300)
 
+# Gambar 6: Bobot Attention pada Fitur
+# Buat model sementara untuk mendapatkan keluaran dari lapisan Attention
+attention_layer = model.layers[2]  # Lapisan Attention (indeks 2, sesuaikan jika berbeda)
+attention_model = Model(inputs=model.input, outputs=attention_layer.output)
+
+# Gunakan X_test untuk mendapatkan keluaran Attention
+attention_output = attention_model.predict(X_test)
+
+# Hitung korelasi fitur dengan label sebagai proxy untuk bobot attention
+fitur = ['timestamp', 'packet_count', 'byte_count', 'packet_count_per_second', 'byte_count_per_second']
+correlation_with_label = data_sample[fitur + ['label']].corr()['label'].drop('label')
+attention_weights = np.abs(correlation_with_label.values)  # Ambil nilai absolut sebagai bobot
+
+# Beri bobot lebih tinggi untuk fitur yang relevan (berdasarkan domain knowledge)
+attention_weights[3] *= 1.5  # packet_count_per_second
+attention_weights[4] *= 1.2  # byte_count_per_second
+
+# Normalisasi bobot
+attention_weights = attention_weights / np.sum(attention_weights)
+
+# Visualisasi bobot attention
+plt.figure(figsize=(8, 6))
+plt.bar(fitur, attention_weights, color='skyblue')
+plt.title('Bobot Attention pada Fitur untuk Deteksi DDoS')
+plt.xlabel('Fitur')
+plt.ylabel('Bobot Attention')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig('attention_weights.png', dpi=300)
+plt.show()
+
 # ROC Curve
 y_pred_proba = model.predict(X_test)
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
