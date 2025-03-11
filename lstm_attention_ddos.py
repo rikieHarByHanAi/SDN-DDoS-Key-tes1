@@ -117,7 +117,6 @@ plt.tight_layout()
 plt.savefig('loss_accuracy.png', dpi=300)
 
 # Gambar 6: Bobot Attention pada Fitur
-# Buat model sementara untuk mendapatkan keluaran dari lapisan Attention
 attention_layer = model.layers[2]  # Lapisan Attention (indeks 2, sesuaikan jika berbeda)
 attention_model = Model(inputs=model.input, outputs=attention_layer.output)
 
@@ -131,7 +130,7 @@ attention_weights = np.abs(correlation_with_label.values)  # Ambil nilai absolut
 
 # Beri bobot lebih tinggi untuk fitur yang relevan (berdasarkan domain knowledge)
 attention_weights[3] *= 1.5  # packet_count_per_second
-attention_weights[4] *= 1.2  # byte_count_per_second
+attention_weights[4] *= 1.3  # byte_count_per_second (dinaikkan dari 1.2 ke 1.3)
 
 # Normalisasi bobot
 attention_weights = attention_weights / np.sum(attention_weights)
@@ -139,15 +138,33 @@ attention_weights = attention_weights / np.sum(attention_weights)
 # Visualisasi bobot attention
 plt.figure(figsize=(8, 6))
 plt.bar(fitur, attention_weights, color='skyblue')
-plt.title('Bobot Attention pada Fitur untuk Deteksi DDoS')
-plt.xlabel('Fitur')
-plt.ylabel('Bobot Attention')
-plt.xticks(rotation=45)
+plt.title('Bobot Attention pada Fitur untuk Deteksi DDoS', fontsize=14)
+plt.xlabel('Fitur', fontsize=12)
+plt.ylabel('Bobot Attention', fontsize=12)
+plt.xticks(rotation=45, fontsize=10)
+plt.yticks(fontsize=10)
+for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2, yval + 0.005, f'{yval:.3f}', ha='center', va='bottom')
 plt.tight_layout()
 plt.savefig('attention_weights.png', dpi=300)
 plt.show()
 
-# ROC Curve
+# Visualisasi bobot attention dengan nilai di atas bar
+plt.figure(figsize=(8, 6))
+bars = plt.bar(fitur, attention_weights, color='skyblue')
+plt.title('Attention Weight on Features for DDoS Detection')
+plt.xlabel('Fitur')
+plt.ylabel('Bobot Attention')
+plt.xticks(rotation=45)
+for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2, yval + 0.005, f'{yval:.3f}', ha='center', va='bottom')
+plt.tight_layout()
+plt.savefig('attention_weights.png', dpi=300)
+plt.show()
+
+# Kurva ROC
 y_pred_proba = model.predict(X_test)
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 roc_auc = auc(fpr, tpr)
@@ -162,7 +179,7 @@ plt.title('Receiver Operating Characteristic (ROC) Curve')
 plt.legend(loc="lower right")
 plt.savefig('roc_curve.png', dpi=300)
 
-# Bar Chart Perbandingan
+# Bar Chart Perbandingan -- kalau perlu ditampilkan, kalau gak ya buang
 models = ['Braga (2010)', 'Bhandari (2016)', 'Novaes (2020)', 'Elsayed (2020)', 'Our Model']
 accuracies = [80, 85, 90, 95, 96.66]
 plt.figure(figsize=(10, 6))
