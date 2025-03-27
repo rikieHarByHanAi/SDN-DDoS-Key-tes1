@@ -94,6 +94,7 @@ accuracies, precisions, recalls, f1_scores = [], [], [], []
 histories = []
 fprs, tprs, aucs = [], [], []
 cms = []
+attention_weights_all_folds = []
 
 # 10-Fold Cross-Validation
 for fold, (train_index, test_index) in enumerate(kf.split(X_seq)):
@@ -139,6 +140,11 @@ for fold, (train_index, test_index) in enumerate(kf.split(X_seq)):
     # Hitung confusion matrix untuk fold ini
     cm = confusion_matrix(y_test, y_pred)
     cms.append(cm)
+
+    # Simpan bobot attention untuk fold ini (ambil 10 sampel pertama dari X_test)
+    attention_weights = attention_layer.get_attention_weights()
+    attention_weights = attention_weights.numpy()  # Untuk TensorFlow 2.x
+    attention_weights_all_folds.append(attention_weights[:10])  # Ambil 10 sampel pertama
 
 # Hitung rata-rata dan standar deviasi metrik
 mean_accuracy = np.mean(accuracies)
@@ -237,14 +243,17 @@ plt.title('Total Confusion Matrix Across 10 Folds')
 plt.show()
 
 # --- Grafik 8: Attention Weights Visualization (Opsional) ---
-attention_weights = attention_layer.get_attention_weights()
-attention_weights = attention_weights.numpy()  # Untuk TensorFlow 2.x
+# Hitung rata-rata bobot attention dari 10 sampel pertama di setiap fold
+attention_weights_all_folds = np.array(attention_weights_all_folds)  # Shape: (n_folds, n_samples, seq_length, 1)
+mean_attention_weights = np.mean(attention_weights_all_folds, axis=(0, 1))  # Rata-rata per timestep
+std_attention_weights = np.std(attention_weights_all_folds, axis=(0, 1))  # Standar deviasi per timestep
 
 plt.figure(figsize=(10, 6))
-plt.bar(range(seq_length), attention_weights[0, :, 0])
-plt.title('Attention Weights for First Sample')
+plt.bar(range(seq_length), mean_attention_weights[:, 0], yerr=std_attention_weights[:, 0], capsize=5, color='skyblue', alpha=0.7)
+plt.title('Average Attention Weights Across 10 Folds (First 10 Samples)')
 plt.xlabel('Timestep')
 plt.ylabel('Attention Weight')
+plt.xticks(range(seq_length), [f'Timestep {i+1}' for i in range(seq_length)])
 plt.show()
 
 # --- Grafik 9: Feature Importance menggunakan SHAP (Opsional) ---
