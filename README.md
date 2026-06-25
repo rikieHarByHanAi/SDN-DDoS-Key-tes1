@@ -1,5 +1,5 @@
 # SDN-DDoS-LSTM-Attention
-Kode untuk artikel JICTRA: "Hybrid LSTM-Attention Model for DDoS Attack Detection in Software-Defined Networking: A Deep Learning Approach".
+Kode untuk artikel "Hybrid LSTM-Attention Model for DDoS Attack Detection in Software-Defined Networking: A Deep Learning Approach".
 
 ## Deskripsi
 - Dataset: SDN_DDoS dari Kaggle.
